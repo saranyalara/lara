@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="83bc80b8-c669-40cd-b8e0-edbe72853cf5" >
+		<salesforce:cached-basic-connection username="${salesforce.username}" password="${salesforce.password}" securityToken="${salesforce.token}" url="${salesforce.url}"/>
+	</salesforce:sfdc-config>
+	<flow name="create-customer-details-SF" doc:id="35b0b6b4-160d-4445-84e2-1d3186813914" >
+		<logger level="INFO" doc:name="Logger" doc:id="c5c97f92-0520-4959-bbf6-3e211425009a" message="#[correlationId] create customer flow starts"/>
+		<set-variable value="Accept" doc:name="Set Variable" doc:id="36b827f0-99d6-4c75-9b36-4b951c1ad7cc" variableName="requestType"/>
+		<ee:transform doc:name="Transform Message" doc:id="4d35e622-8291-417a-9588-bc1e621d3cad">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+Name: payload.Name,
+AccountNumber: payload.AccountNumber,
+Phone: payload.Phone,
+BillingStreet: payload.BillingStreet,
+BillingCity: payload.BillingCity,
+BillingState: payload.BillingState,
+BillingPostalCode: payload.BillingPostalCode,
+BillingCountry: payload.BillingCountry,
+ShippingStreet: payload.BillingStreet,
+ShippingCity: payload.BillingCity,
+ShippingState: payload.BillingState,
+ShippingPostalCode: payload.BillingPostalCode,
+ShippingCountry: payload.BillingCountry
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create doc:id="62d2f4e0-0d79-415d-bdf4-a4fdb2741f5e" config-ref="Salesforce_Config" type="Account"/>
+		<ee:transform doc:name="Transform Message" doc:id="87c3ba26-63c6-4c1c-b188-5c4fb595a2fb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="8df8e21c-9664-45b7-b095-4c3da8e3da29" message="#[correlationId] The customer information are store in Salesforce"/>
+	</flow>
+	<flow name="update-customer-details-SF" doc:id="b3331de3-59c5-4d0e-ac2f-0e2023b1b243" >
+		<logger level="INFO" doc:name="Logger" doc:id="31aa15f7-63d9-4175-a5d8-a0de98636838" message="#[correlationId] The customer update flow starts"/>
+		<ee:transform doc:name="Transform Message" doc:id="f5f7965c-59ad-4791-86f6-f17878e3bf58" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[
+
+payload
+
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:upsert doc:name="Upsert" doc:id="65745730-9d22-4af4-8d03-03e8b7bcd6ef" config-ref="Salesforce_Config" type="Account" externalIdFieldName="external__c"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c172e4a3-f2c3-46da-ba79-41ac61a13e26" message="#[correlationId] The customer information are updated in Salesforce----- #[payload]"/>
+	</flow>
+	<flow name="retrieve-customer-details-SF" doc:id="94af8f01-9688-4b3b-916f-5d9221466b6e" >
+        <logger level="INFO" doc:name="Logger" doc:id="b6b6bcda-43ce-4fe0-a9ea-c0b8d24dc825" message="#[correlationId] The customer information retrieve flow starts"/>
+		<set-variable value="retrieve" doc:name="Set Variable" doc:id="375f6a41-3ed5-4736-861e-58ca847f6f74" variableName="requestType"/>
+		<salesforce:query doc:name="Query" doc:id="cf7ce61b-a64a-421e-a949-adc657079b8a" config-ref="Salesforce_Config">
+            <salesforce:salesforce-query >SELECT Name,BillingStreet,BillingCity,BillingState,BillingPostalCode,BillingCountry FROM Account</salesforce:salesforce-query>
+        </salesforce:query>
+        <ee:transform doc:name="Transform Message" doc:id="74fc84b8-8217-4ade-ad01-6a4c3ac17570" >
+            <ee:message >
+                <ee:set-payload ><![CDATA[%dw 2.0
+output application/jSON
+---
+payload map(object,index)->
+{
+"Name": object.Name,
+"BillingStreet":object.BillingStreet,
+"BillingCity": object.BillingCity,
+"BillingState":object.BillingState,
+"BillingCountry": object.BillingCountry,
+"BillingPostalCode":object.BillingPostalCode
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4e7b492d-4118-40e2-8b9e-1d9278d6323c" message="#[correlationId] The customer information are retrieved in Salesforce"/>
+    
+</flow>
+</mule>

@@ -1,0 +1,45 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/97957f9b-7039-451a-ad5d-e9310f29fe13/ # 
+title: businessUseCase
+version: 1.0
+mediaType: 
+  - application/json
+  - application/xml
+protocols: HTTP
+    
+/sf:
+  /store:
+    post:
+      body:
+        application/json:
+          example:
+            !include examples/Request/storeReqExample.raml
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                !include examples/Response/storeResExample.raml
+  /retrieve:
+    get:
+      body:
+        application/json:
+          example:
+            !include examples/Request/retrieveReqExample.raml
+      responses:
+        200:
+          body:
+            example:
+              !include examples/Response/retrieveResExample.raml
+  /update:
+    put:
+      body:
+        application/json:
+          example:
+            !include examples/Request/updateReqExample.raml
+      responses:
+        200:
+          body:
+            example:
+              !include examples/Response/updateResExample.raml
+                

@@ -1,0 +1,42 @@
+salesforce:
+  username: "saranya.ravi@apisero.com"
+  password: "$@6Anya02"
+  token: "hUQusyP3xhsFJLojaZeejz880"
+  url: "https://login.salesforce.com/services/Soap/u/46.0"
+
+http:
+  host: 0.0.0.0
+  port: "8081"
+ 
+
+http1:
+  host: 0.0.0.0
+  port: "8082"
+  path: /process
+  
+http2:
+  host: 0.0.0.0
+  port: "8083"
+  path: /exp
+  
+api:
+  path: \api\salesforce\create
+api:
+  path: \api\salesforce\update
+apicon:
+  path: \api\salesforce\retrieve
+      
+HttpRequestcreate:
+  host: "0.0.0.0"
+  port: "8084"
+  
+HttpRequestupdate:
+  host: "0.0.0.0"
+  port: "8085"
+  
+HttpRequestretrieve:
+  host: "0.0.0.0"
+  port: "8086"
+ 
+
+
